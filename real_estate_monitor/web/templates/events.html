@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}Eventos - Imoveis Monitor{% endblock %}
+{% block content %}
+<div class="row mt-4">
+    <div class="col-md-2 sidebar p-3">
+        <h6><i class="bi bi-funnel"></i> Filtros</h6>
+        <form method="GET" action="{{ url_for('events') }}">
+            <div class="mb-3">
+                <label class="form-label small">Verificado</label>
+                <select name="verified" class="form-select form-select-sm">
+                    <option value="">Todos</option>
+                    <option value="yes" {% if request.args.get('verified') == 'yes' %}selected{% endif %}>Sim</option>
+                    <option value="no" {% if request.args.get('verified') == 'no' %}selected{% endif %}>Nao</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small">Tipo</label>
+                <select name="type" class="form-select form-select-sm">
+                    <option value="">Todos</option>
+                    <option value="NEW" {% if request.args.get('type') == 'NEW' %}selected{% endif %}>NEW</option>
+                    <option value="UPDATED" {% if request.args.get('type') == 'UPDATED' %}selected{% endif %}>UPDATED</option>
+                    <option value="PRICE_CHANGED" {% if request.args.get('type') == 'PRICE_CHANGED' %}selected{% endif %}>PRICE_CHANGED</option>
+                    <option value="REMOVED" {% if request.args.get('type') == 'REMOVED' %}selected{% endif %}>REMOVED</option>
+                    <option value="REACTIVATED" {% if request.args.get('type') == 'REACTIVATED' %}selected{% endif %}>REACTIVATED</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small">Source</label>
+                <select name="source" class="form-select form-select-sm">
+                    <option value="">Todas</option>
+                    {% for s in sources %}
+                    <option value="{{ s.id }}" {% if request.args.get('source')|int == s.id %}selected{% endif %}>{{ s.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-sm btn-primary w-100">Filtrar</button>
+        </form>
+    </div>
+    <div class="col-md-10">
+        <h4 class="mb-3">{{ events|length }} eventos</h4>
+        {% if not events %}
+        <div class="alert alert-info">Nenhum evento encontrado.</div>
+        {% else %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Data</th>
+                        <th>Tipo</th>
+                        <th>Imovel</th>
+                        <th>Preco</th>
+                        <th>Source</th>
+                        <th>Acoes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in events %}
+                    <tr class="{% if not event.verified %}table-warning{% endif %}">
+                        <td>
+                            {% if event.verified %}
+                            <i class="bi bi-check-circle-fill verified-check"></i>
+                            {% else %}
+                            <i class="bi bi-x-circle unverified-check"></i>
+                            {% endif %}
+                        </td>
+                        <td class="small">{{ event.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>
+                            <span class="badge event-badge
+                                {% if event.event_type == 'NEW' %}bg-success
+                                {% elif event.event_type == 'PRICE_CHANGED' %}bg-warning text-dark
+                                {% elif event.event_type == 'UPDATED' %}bg-info
+                                {% elif event.event_type == 'REMOVED' %}bg-danger
+                                {% elif event.event_type == 'REACTIVATED' %}bg-secondary
+                                {% else %}bg-secondary{% endif %}">
+                                {{ event.event_type }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if event.listing %}
+                            <strong>{{ event.listing.title or event.listing.external_id }}</strong>
+                            {% if event.listing.address %}
+                            <br><small class="text-muted">{{ event.listing.address[:40] }}{% if event.listing.address|length > 40 %}...{% endif %}</small>
+                            {% endif %}
+                            {% else %}
+                            <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if event.listing and event.listing.price %}
+                            <span class="text-success fw-bold">R$ {{ "{:,.2f}".format(event.listing.price) }}</span>
+                            {% endif %}
+                            {% if event.old_price and event.new_price %}
+                            <br><small class="text-muted"><s>R$ {{ "{:,.2f}".format(event.old_price) }}</s> -> R$ {{ "{:,.2f}".format(event.new_price) }}</small>
+                            {% endif %}
+                        </td>
+                        <td><small>{{ event.source.name }}</small></td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <button class="btn btn-sm btn-outline-success verify-btn" data-event-id="{{ event.id }}" onclick="toggleVerify({{ event.id }}, this)">
+                                    {% if event.verified %}
+                                    <i class="bi bi-check-circle"></i> Verificado
+                                    {% else %}
+                                    <i class="bi bi-check-lg"></i> Verificar
+                                    {% endif %}
+                                </button>
+                                {% if event.listing and event.listing.url %}
+                                <a href="{{ event.listing.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function toggleVerify(eventId, btn) {
+    fetch('/events/' + eventId + '/toggle-verify', { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            const row = btn.closest('tr');
+            if (data.verified) {
+                row.classList.remove('table-warning');
+                btn.innerHTML = '<i class="bi bi-check-circle"></i> Verificado';
+                btn.classList.remove('btn-outline-success');
+                btn.classList.add('btn-success');
+                row.querySelector('td:first-child i').className = 'bi bi-check-circle-fill verified-check';
+            } else {
+                row.classList.add('table-warning');
+                btn.innerHTML = '<i class="bi bi-check-lg"></i> Verificar';
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-outline-success');
+                row.querySelector('td:first-child i').className = 'bi bi-x-circle unverified-check';
+            }
+        });
+}
+</script>
+{% endblock %}

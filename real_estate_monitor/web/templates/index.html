@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Imoveis Monitor{% endblock %}
+{% block content %}
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-building"></i> Imoveis</h5>
+                <p class="card-text display-6">{{ total_listings }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-clock-history"></i> Eventos</h5>
+                <p class="card-text display-6">{{ total_events }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ url_for('favorites') }}" class="text-decoration-none">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-heart-fill"></i> Favoritos</h5>
+                    <p class="card-text display-6">{{ favorite_count }}</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-exclamation-triangle"></i> Nao verificados</h5>
+                <p class="card-text display-6">{{ unverified_count }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ url_for('duplicates') }}" class="text-decoration-none">
+            <div class="card text-white bg-secondary mb-3">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-copy"></i> Duplicatas</h5>
+                    <p class="card-text display-6">{{ duplicate_count }}</p>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+{% if favorites %}
+<h4 class="mt-4 mb-3"><i class="bi bi-heart-fill text-danger"></i> Favoritos</h4>
+<div class="row">
+    {% for listing in favorites %}
+    <div class="col-md-4 col-lg-3 mb-4">
+        <div class="card listing-card h-100 border-danger">
+            {% if listing.image_url %}
+            <img src="{{ listing.image_url }}" class="listing-img card-img-top" alt="{{ listing.title }}"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="card-img-placeholder" style="display:none;">
+                <i class="bi bi-image" style="font-size: 2rem;"></i>
+            </div>
+            {% else %}
+            <div class="card-img-placeholder">
+                <i class="bi bi-image" style="font-size: 2rem;"></i>
+            </div>
+            {% endif %}
+            <div class="card-body">
+                <h6 class="card-title">{{ listing.title or listing.external_id }}</h6>
+                {% if listing.price %}
+                <p class="card-text text-success fw-bold">R$ {{ "{:,.2f}".format(listing.price) }}</p>
+                {% endif %}
+                {% if listing.address %}
+                <p class="card-text text-muted small"><i class="bi bi-geo-alt"></i> {{ listing.address[:50] }}{% if listing.address|length > 50 %}...{% endif %}</p>
+                {% endif %}
+                <div class="d-flex gap-2 small text-muted mb-2">
+                    {% if listing.bedrooms %}<span><i class="bi bi-door-open"></i> {{ listing.bedrooms }}</span>{% endif %}
+                    {% if listing.bathrooms %}<span><i class="bi bi-droplet"></i> {{ listing.bathrooms }}</span>{% endif %}
+                    {% if listing.parking %}<span><i class="bi bi-car-front"></i> {{ listing.parking }}</span>{% endif %}
+                </div>
+                <p class="card-text small text-muted"><i class="bi bi-tag"></i> {{ listing.source.name }}</p>
+                <div class="d-flex gap-2">
+                    {% if listing.url %}
+                    <a href="{{ listing.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-box-arrow-up-right"></i> Ver anuncio
+                    </a>
+                    {% endif %}
+                    <button class="btn btn-sm btn-outline-danger fav-btn" data-listing-id="{{ listing.id }}" onclick="toggleFavorite({{ listing.id }}, this)">
+                        <i class="bi bi-heart-fill"></i> Remover
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<h4 class="mt-4 mb-3">Eventos nao verificados</h4>
+{% if not events %}
+<div class="alert alert-success">
+    <i class="bi bi-check-circle"></i> Todos os eventos foram verificados!
+</div>
+{% else %}
+<div class="row">
+    {% for event in events %}
+    <div class="col-md-4 col-lg-3 mb-4">
+        <div class="card listing-card h-100">
+            {% if event.listing and event.listing.image_url %}
+            <img src="{{ event.listing.image_url }}" class="listing-img card-img-top" alt="{{ event.listing.title }}"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="card-img-placeholder" style="display:none;">
+                <i class="bi bi-image" style="font-size: 2rem;"></i>
+            </div>
+            {% else %}
+            <div class="card-img-placeholder">
+                <i class="bi bi-image" style="font-size: 2rem;"></i>
+            </div>
+            {% endif %}
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="badge event-badge
+                        {% if event.event_type == 'NEW' %}bg-success
+                        {% elif event.event_type == 'PRICE_CHANGED' %}bg-warning text-dark
+                        {% elif event.event_type == 'UPDATED' %}bg-info
+                        {% elif event.event_type == 'REMOVED' %}bg-danger
+                        {% elif event.event_type == 'REACTIVATED' %}bg-secondary
+                        {% else %}bg-secondary{% endif %}">
+                        {{ event.event_type }}
+                    </span>
+                    <small class="text-muted">{{ event.created_at.strftime('%d/%m %H:%M') }}</small>
+                </div>
+                <h6 class="card-title">
+                    {% if event.listing %}{{ event.listing.title or event.listing.external_id }}{% else %}N/A{% endif %}
+                </h6>
+                {% if event.listing and event.listing.price %}
+                <p class="card-text text-success fw-bold">R$ {{ "{:,.2f}".format(event.listing.price) }}</p>
+                {% endif %}
+                {% if event.listing and event.listing.address %}
+                <p class="card-text text-muted small"><i class="bi bi-geo-alt"></i> {{ event.listing.address[:50] }}{% if event.listing.address|length > 50 %}...{% endif %}</p>
+                {% endif %}
+                {% if event.listing %}
+                <div class="d-flex gap-2 small text-muted mb-2">
+                    {% if event.listing.bedrooms %}<span><i class="bi bi-door-open"></i> {{ event.listing.bedrooms }}</span>{% endif %}
+                    {% if event.listing.bathrooms %}<span><i class="bi bi-droplet"></i> {{ event.listing.bathrooms }}</span>{% endif %}
+                    {% if event.listing.parking %}<span><i class="bi bi-car-front"></i> {{ event.listing.parking }}</span>{% endif %}
+                </div>
+                {% endif %}
+                <p class="card-text small text-muted"><i class="bi bi-tag"></i> {{ event.source.name }}</p>
+                <div class="d-flex gap-2">
+                    {% if event.listing and event.listing.url %}
+                    <a href="{{ event.listing.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-box-arrow-up-right"></i> Ver anuncio
+                    </a>
+                    {% endif %}
+                    {% if event.listing %}
+                    <button class="btn btn-sm {% if event.listing.is_favorite %}btn-danger{% else %}btn-outline-danger{% endif %} fav-btn" data-listing-id="{{ event.listing.id }}" onclick="toggleFavorite({{ event.listing.id }}, this)">
+                        <i class="bi bi-heart{% if event.listing.is_favorite %}-fill{% endif %}"></i>
+                    </button>
+                    {% endif %}
+                    <button class="btn btn-sm btn-outline-success verify-btn" data-event-id="{{ event.id }}" onclick="toggleVerify({{ event.id }}, this)">
+                        <i class="bi bi-check-lg"></i> Verificar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<script>
+function toggleVerify(eventId, btn) {
+    fetch('/events/' + eventId + '/toggle-verify', { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            if (data.verified) {
+                btn.closest('.col-md-4').querySelector('.card').style.opacity = '0.5';
+                btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Verificado';
+                btn.classList.remove('btn-outline-success');
+                btn.classList.add('btn-success');
+                btn.disabled = true;
+            }
+        });
+}
+
+function toggleFavorite(listingId, btn) {
+    fetch('/listings/' + listingId + '/toggle-favorite', { method: 'POST', credentials: 'same-origin' })
+        .then(r => {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+        })
+        .then(data => {
+            if (data.favorite) {
+                btn.innerHTML = '<i class="bi bi-heart-fill"></i>';
+                btn.classList.remove('btn-outline-danger');
+                btn.classList.add('btn-danger');
+            } else {
+                btn.innerHTML = '<i class="bi bi-heart"></i>';
+                btn.classList.remove('btn-danger');
+                btn.classList.add('btn-outline-danger');
+                const favSection = document.querySelector('.border-danger');
+                if (favSection) {
+                    location.reload();
+                }
+            }
+        })
+        .catch(err => {
+            console.error('Favorite toggle failed:', err);
+            alert('Erro ao favoritar: ' + err.message);
+        });
+}
+
+function runSource(sourceId) {
+    fetch('/run/' + sourceId, { method: 'POST' })
+        .then(r => r.json())
+        .then(data => alert('Executando: ' + data.source));
+}
+
+function runAll() {
+    fetch('/run-all', { method: 'POST' })
+        .then(r => r.json())
+        .then(data => alert('Executando todas as sources'));
+}
+</script>
+{% endblock %}

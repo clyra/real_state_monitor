@@ -1,0 +1,193 @@
+sources:
+  - id: jla_imoveis
+    name: "JLA Imóveis"
+    url_template: "https://www.jlaimoveis.com.br/imoveis/para-alugar/casa+sobrado?preco-de-locacao={min_price}~{max_price}&ordenar=recentes"
+    filters:
+      min_price: 2000
+      max_price: 4500
+    adapter: "playwright_bs"
+    enabled: true
+    config:
+      headless: true
+      wait_selector: ".card-with-buttons"
+      wait_timeout: 15000
+      listing_selector: ".card-with-buttons"
+      pagination_type: "scroll"
+      pagination:
+        max_pages: 10
+        scroll_pause: 2.0
+      removal_grace_period: 2
+      scrape_health_threshold: 0.6
+      fields:
+        title: ".card-with-buttons__title"
+        price: ".card-with-buttons__value"
+        address: ".card-with-buttons__heading"
+        url: ""
+        bedrooms: "ul li:nth-child(2)"
+        bathrooms: "ul li:nth-child(3)"
+        parking: "ul li:nth-child(4)"
+        area: "ul li:nth-child(1)"
+        description: ""
+        image_url: ".cards_digital_carousel-image"
+
+  - id: una_imoveis
+    name: "UNA Imóveis Conectados"
+    url_template: "https://unaimoveisconectados.com.br/imoveis/alugar/casa-casa_em_condominio-sobrado-sobrado_em_condominio/residencial/todos-os-bairros/{city}?tipoNegocio=alugar&categoriaImovel=residencial&tipoImovel%5B%5D=casa&tipoImovel%5B%5D=casa_em_condominio&tipoImovel%5B%5D=sobrado&tipoImovel%5B%5D=sobrado_em_condominio&cidade={city}&precoMin={min_price}&precoMax={max_price}&areaMin=&areaMax="
+    filters:
+      city: curitiba
+      min_price: 2000
+      max_price: 5000
+    adapter: "playwright_bs"
+    enabled: true
+    config:
+      headless: true
+      wait_selector: ".card-imovel"
+      wait_timeout: 20000
+      listing_selector: ".card-imovel"
+      pagination_type: "scroll"
+      pagination:
+        max_pages: 15
+        scroll_pause: 2.0
+      removal_grace_period: 2
+      scrape_health_threshold: 0.6
+      fields:
+        title: "[data-nome-imovel]"
+        price: "[data-valor-imovel]"
+        address: "[data-bairro]"
+        url: ""
+        bedrooms: "[data-qtd-quartos]"
+        bathrooms: "[data-qtd-banheiros]"
+        parking: "[data-qtd-vagas]"
+        area: "[data-area-total]"
+        description: ""
+        image_url: ".infoImovel.fotos img"
+
+  - id: jb9_imoveis
+    name: "JB9 Imóveis"
+    url_template: "https://www.jb9.com.br/alugar/pr/{city}/casa/valor-{min_price}_{max_price}/ordem-recentes/resultado-decrescente/quantidade-48/"
+    filters:
+      city: curitiba
+      min_price: 2000
+      max_price: 4500
+    adapter: "playwright_bs"
+    enabled: true
+    config:
+      headless: true
+      wait_selector: "a.link_resultado"
+      wait_timeout: 15000
+      listing_selector: "a.link_resultado"
+      pagination_type: "click"
+      pagination:
+        max_pages: 10
+        next_button: ".pagination a:has-text('2'), .pagination li:not(.active) a"
+        wait_after_click: 3.0
+      removal_grace_period: 2
+      scrape_health_threshold: 0.6
+      fields:
+        title: ".titulo_novo"
+        price: ".valor_novo h5"
+        address: ".final_card span"
+        url: ""
+        bedrooms: ".icones_caracteristicas .detalhe_novo:nth-child(1) .icone_numero span"
+        bathrooms: ".icones_caracteristicas .detalhe_novo:nth-child(2) .icone_numero span"
+        parking: ".icones_caracteristicas .detalhe_novo:nth-child(3) .icone_numero span"
+        area: ""
+        description: ""
+        image_url: ".swiper_resultados .swiper-slide:first-child img"
+
+  - id: baggio_imoveis
+    name: "Baggio Imóveis"
+    url_template: "https://baggioimoveis.com.br/imoveis-para-alugar/jsf/jet-engine:aluguel/tax/imovel_tipo:casa-em-condominio,casa-residencial,sobrado/meta/valor-aluguel!range:{min_price}_{max_price}/sort/orderby:date;order:ASC/"
+    filters:
+      min_price: 2500
+      max_price: 4500
+    adapter: "playwright_bs"
+    enabled: true
+    config:
+      headless: true
+      wait_selector: ".jet-listing-grid__item"
+      wait_timeout: 20000
+      listing_selector: ".jet-listing-grid__item"
+      pagination_type: "click"
+      pagination:
+        max_pages: 15
+        next_button: ".jet-filters-pagination .prev-next.next"
+        wait_after_click: 3.0
+      removal_grace_period: 2
+      scrape_health_threshold: 0.6
+      fields:
+        title: "h5.elementor-heading-title a"
+        price: ".jet-listing-dynamic-field__content"
+        address: ".elementor-widget-text-editor .elementor-widget-container"
+        url: ".jet-engine-listing-overlay-link"
+        bedrooms: ".elementor-inline-item:nth-child(1) .elementor-icon-list-text"
+        bathrooms: ".elementor-inline-item:nth-child(3) .elementor-icon-list-text"
+        parking: ".elementor-inline-item:nth-child(4) .elementor-icon-list-text"
+        area: ".elementor-inline-item:nth-child(5) .elementor-icon-list-text"
+        description: ""
+        image_url: ".elementor-shortcode img"
+
+  - id: kondor_imoveis
+    name: "Kondor Imóveis"
+    url_template: "https://kondorimoveis.com.br/imoveis/alugar/casa-casa_em_condominio-sobrado-sobrado_em_condominio/residencial/todos-os-bairros/{city}?tipoNegocio=alugar&categoriaImovel=residencial&tipoImovel%5B%5D=casa&tipoImovel%5B%5D=casa_em_condominio&tipoImovel%5B%5D=sobrado&tipoImovel%5B%5D=sobrado_em_condominio&cidade={city}&precoMin={min_price}&precoMax={max_price}&areaMin=&areaMax="
+    filters:
+      city: curitiba
+      min_price: 1800
+      max_price: 4000
+    adapter: "playwright_bs"
+    enabled: true
+    config:
+      headless: true
+      wait_selector: ".card-imovel"
+      wait_timeout: 20000
+      listing_selector: ".card-imovel"
+      pagination_type: "scroll"
+      pagination:
+        max_pages: 15
+        scroll_pause: 2.0
+      removal_grace_period: 2
+      scrape_health_threshold: 0.6
+      fields:
+        title: ".mb-0.fw-semibold.fs-6.text-truncate"
+        price: ".preco"
+        address: ".tipoBairro"
+        url: ""
+        bedrooms: ".destaques-lista:nth-of-type(2) .item-destaque"
+        bathrooms: ".destaques-lista:nth-of-type(4) .item-destaque"
+        parking: ".destaques-lista:nth-of-type(5) .item-destaque"
+        area: ".destaques-lista:nth-of-type(1) .item-destaque"
+        description: ""
+        image_url: ".infoImovel.fotos img"
+
+  - id: imobiliaria_2000
+    name: "Imobiliária 2000"
+    url_template: "https://www.imobiliaria2000.com.br/busca/?transacao=Locação&finalidade=Residencial&tipo=Casa&cidade={city}&imob_codigo=&area_ate=0%2C1000&valor_ate={min_price}%2C{max_price}&ordenar=&limite=&referencia="
+    filters:
+      city: Curitiba
+      min_price: 2000
+      max_price: 4500
+    adapter: "playwright_bs"
+    enabled: true
+    config:
+      headless: true
+      wait_selector: ".single-resultado"
+      wait_timeout: 15000
+      listing_selector: ".single-resultado"
+      pagination_type: "click"
+      pagination:
+        max_pages: 10
+        next_button: ".pagination a:has-text('Próximo'), .pagination li:last-child a, a:has-text('»')"
+        wait_after_click: 3.0
+      removal_grace_period: 2
+      scrape_health_threshold: 0.6
+      fields:
+        title: ".titulo-busca h2"
+        price: ".valor-single h3"
+        address: ".info-single p:nth-of-type(2)"
+        url: ".bt-conheca-single a"
+        bedrooms: ""
+        bathrooms: ""
+        parking: ""
+        area: ".info-single p:nth-of-type(4)"
+        description: ""
+        image_url: ".bg-single img"

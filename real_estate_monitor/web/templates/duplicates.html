@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Duplicatas - Imoveis Monitor{% endblock %}
+{% block extra_css %}
+<style>
+    .dup-card { border-left: 4px solid #6c757d; }
+    .dup-card.method-property_code { border-left-color: #198754; }
+    .dup-card.method-score { border-left-color: #ffc107; }
+    .listing-side { background: #f8f9fa; border-radius: 8px; padding: 1rem; }
+    .listing-side img { height: 160px; object-fit: cover; width: 100%; border-radius: 6px; }
+    .placeholder-img { height: 160px; background: #e9ecef; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #adb5bd; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4><i class="bi bi-copy"></i> Duplicatas não revisadas
+            <span class="badge bg-secondary ms-2">{{ pairs|length }}</span>
+        </h4>
+        <small class="text-muted">
+            <span class="badge bg-success me-1">property_code</span> código compartilhado &nbsp;
+            <span class="badge bg-warning text-dark me-1">score</span> similaridade por atributos
+        </small>
+    </div>
+
+    {% if not pairs %}
+    <div class="alert alert-success">
+        <i class="bi bi-check-circle"></i> Nenhuma duplicata pendente de revisão.
+    </div>
+    {% endif %}
+
+    {% for pair in pairs %}
+    <div class="card mb-4 dup-card method-{{ pair.method }}" id="dup-{{ pair.id }}">
+        <div class="card-header d-flex justify-content-between align-items-center py-2">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge {% if pair.method == 'property_code' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                    {{ pair.method }}
+                </span>
+                <span class="text-muted small">score {{ pair.score }}</span>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-success" onclick="reviewDuplicate({{ pair.id }}, 'confirm', this)">
+                    <i class="bi bi-check-lg"></i> Confirmar duplicata
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="reviewDuplicate({{ pair.id }}, 'reject', this)">
+                    <i class="bi bi-x-lg"></i> Rejeitar
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                {% for listing in [pair.listing_a, pair.listing_b] %}
+                <div class="col-md-6">
+                    <div class="listing-side h-100">
+                        {% if listing.image_url %}
+                        <img src="{{ listing.image_url }}" alt="{{ listing.title }}"
+                             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                        <div class="placeholder-img" style="display:none;"><i class="bi bi-image" style="font-size:2rem;"></i></div>
+                        {% else %}
+                        <div class="placeholder-img"><i class="bi bi-image" style="font-size:2rem;"></i></div>
+                        {% endif %}
+
+                        <div class="mt-2">
+                            <span class="badge bg-dark mb-1">{{ listing.source.name }}</span>
+                            <h6 class="mb-1">{{ listing.title or listing.external_id }}</h6>
+
+                            {% if listing.price %}
+                            <p class="text-success fw-bold mb-1">R$ {{ "{:,.2f}".format(listing.price) }}</p>
+                            {% endif %}
+
+                            {% if listing.address %}
+                            <p class="text-muted small mb-1"><i class="bi bi-geo-alt"></i> {{ listing.address }}</p>
+                            {% endif %}
+
+                            <div class="d-flex gap-3 small text-muted mb-2">
+                                {% if listing.bedrooms %}<span><i class="bi bi-door-open"></i> {{ listing.bedrooms }} quartos</span>{% endif %}
+                                {% if listing.bathrooms %}<span><i class="bi bi-droplet"></i> {{ listing.bathrooms }} banheiros</span>{% endif %}
+                                {% if listing.parking %}<span><i class="bi bi-car-front"></i> {{ listing.parking }} vagas</span>{% endif %}
+                                {% if listing.area %}<span><i class="bi bi-rulers"></i> {{ listing.area }} m²</span>{% endif %}
+                            </div>
+
+                            <div class="d-flex gap-2 flex-wrap">
+                            {% if listing.url %}
+                            <a href="{{ listing.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-box-arrow-up-right"></i> Ver anúncio
+                            </a>
+                            {% endif %}
+                            {% set murl = listing.address | maps_url %}
+                            {% if murl %}
+                            <a href="{{ murl }}" target="_blank" class="btn btn-sm btn-outline-success" title="{{ listing.address }}">
+                                <i class="bi bi-map"></i> Maps
+                            </a>
+                            {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% block extra_js %}
+<script>
+function reviewDuplicate(dupId, action, btn) {
+    fetch('/duplicates/' + dupId + '/review', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({action: action})
+    })
+    .then(r => r.json())
+    .then(() => {
+        const card = document.getElementById('dup-' + dupId);
+        card.style.transition = 'opacity 0.3s';
+        card.style.opacity = '0';
+        setTimeout(() => card.remove(), 300);
+    });
+}
+</script>
+{% endblock %}
+{% endblock %}
