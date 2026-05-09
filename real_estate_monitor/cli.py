@@ -321,6 +321,11 @@ def backfill_property_codes():
             m = re.search(r"/(\d{6,})/?$", url)
             return m.group(1) if m else None
 
+        if config_id == "jba_imoveis":
+            # /imovel/2095/slug
+            m = re.search(r"/imovel/(\d+)/", url)
+            return m.group(1) if m else None
+
         return None
 
     session = get_session()

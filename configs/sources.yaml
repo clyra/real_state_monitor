@@ -191,6 +191,32 @@ sources:
         image_url: ".cards_digital_carousel-image"
         property_code: ".card_split_vertically__code"
 
+  - id: jba_imoveis
+    name: "JBA Imóveis"
+    url: "https://jbaimoveis.com.br/aluguel/casa/curitiba/?query-cursor=&search-params="
+    adapter: "playwright_bs"
+    enabled: true
+    config:
+      headless: true
+      wait_selector: ".imovel-box-single"
+      wait_timeout: 60000
+      listing_selector: ".imovel-box-single"
+      pagination_type: "none"
+      removal_grace_period: 2
+      scrape_health_threshold: 0.3
+      fields:
+        title: ".titulo-grid"
+        price: ".thumb-price"
+        address: "h3"
+        url: "a.swiper-wrapper"
+        bedrooms: ".amenities-main div:nth-child(1) span"
+        bathrooms: ""
+        parking: ".amenities-main div:nth-child(2) span"
+        area: ".amenities-main div:nth-child(3) span"
+        description: ""
+        image_url: ""
+        property_code: ""
+
   - id: imobiliaria_2000
     name: "Imobiliária 2000"
     url_template: "https://www.imobiliaria2000.com.br/busca/?transacao=Locação&finalidade=Residencial&tipo=Casa&cidade={city}&imob_codigo=&area_ate=0%2C1000&valor_ate={min_price}%2C{max_price}&ordenar=&limite=&referencia="
