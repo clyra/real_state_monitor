@@ -17,7 +17,8 @@ _URL_CODE_PATTERNS = [
 
 # Known code suffixes → agency name. Extend as new suffixes are discovered.
 _SUFFIX_TO_AGENCY: dict[str, str] = {
-    "TAN": "Tantus Imóveis",
+    "TAN":  "Tantus Imóveis",
+    "JLAB": "JLA Imóveis",
 }
 
 

@@ -278,6 +278,82 @@ def find_duplicates():
 
 
 @app.command()
+def backfill_property_codes():
+    """Preenche property_code de imóveis já existentes no banco extraindo da URL."""
+    import re
+
+    # Per-source URL code extractors.
+    # Returns the normalized code string or None.
+    def _from_url(config_id: str, url: str | None) -> str | None:
+        if not url:
+            return None
+
+        if config_id == "imobiliaria_2000":
+            # ?ref=60272006-PCE  or  ?ref=07804.001-CIL
+            m = re.search(r"[?&]ref=([^&]+)", url)
+            return m.group(1).upper() if m else None
+
+        if config_id == "jla_imoveis":
+            # /imovel/SLUG/SO0227-JLAB?from=rent
+            m = re.search(r"/([A-Z]{2}\d{3,5}-[A-Z]{2,5})(?:\?|$)", url, re.I)
+            return m.group(1).upper() if m else None
+
+        if config_id == "baggio_imoveis":
+            # Slug ends with code after "para-aluguel-":
+            #   para-aluguel-so0029-mot      →  SO0029-MOT
+            #   para-aluguel-05107-001       →  05107-001
+            #   para-aluguel-03265-001-cb    →  03265-001-CB
+            #   para-aluguel-bg03410006      →  BG03410006
+            m = re.search(r"para-aluguel-([a-z0-9]+(?:-[a-z0-9]+)*)/?(?:\?|$)", url, re.I)
+            return m.group(1).upper() if m else None
+
+        if config_id in ("kondor_imoveis", "una_imoveis"):
+            # Numeric 8-digit code: alugar-...-00235001/4400404
+            m = re.search(r"-(\d{7,8})/\d+/?$", url)
+            if m:
+                return m.group(1)
+            # Alpha-numeric code: alugar-...-so0049/4402164
+            m = re.search(r"-([a-z]{2}\d{4,5})(?:/\d+)?/?$", url, re.I)
+            return m.group(1).upper() if m else None
+
+        if config_id == "jb9_imoveis":
+            # /casa/78326645
+            m = re.search(r"/(\d{6,})/?$", url)
+            return m.group(1) if m else None
+
+        return None
+
+    session = get_session()
+    listings = (
+        session.query(Listing)
+        .join(Listing.source)
+        .filter(Listing.property_code.is_(None), Listing.url.isnot(None))
+        .all()
+    )
+
+    updated = 0
+    skipped = 0
+    by_source: dict[str, int] = {}
+
+    for listing in listings:
+        config_id = listing.source.config_id or ""
+        code = _from_url(config_id, listing.url)
+        if code:
+            listing.property_code = code
+            updated += 1
+            by_source[listing.source.name] = by_source.get(listing.source.name, 0) + 1
+        else:
+            skipped += 1
+
+    session.commit()
+    session.close()
+
+    typer.echo(f"Backfill concluído: {updated} atualizados, {skipped} sem código detectável.")
+    for source_name, count in sorted(by_source.items()):
+        typer.echo(f"  {source_name}: {count}")
+
+
+@app.command()
 def favorite_listing(
     listing_id: int = typer.Argument(..., help="ID of the listing to favorite"),
 ):
