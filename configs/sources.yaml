@@ -159,6 +159,37 @@ sources:
         description: ""
         image_url: ".infoImovel.fotos img"
 
+  - id: tantus_imoveis
+    name: "Tantus Imóveis"
+    url_template: "https://www.tantus.com.br/imoveis/para-alugar/casa+sobrado/curitiba?preco-de-locacao={min_price}~{max_price}&ordenar=exclusivos"
+    filters:
+      min_price: 2000
+      max_price: 4500
+    adapter: "playwright_bs"
+    enabled: true
+    config:
+      headless: true
+      wait_selector: ".card_split_vertically"
+      wait_timeout: 15000
+      listing_selector: ".card_split_vertically"
+      pagination_type: "scroll"
+      pagination:
+        max_pages: 10
+        scroll_pause: 2.0
+      removal_grace_period: 2
+      scrape_health_threshold: 0.6
+      fields:
+        title: ".card_split_vertically__type"
+        price: ".card_split_vertically__value"
+        address: ".card_split_vertically__location"
+        url: ""
+        bedrooms: ".card_split_vertically__spec:nth-child(2)"
+        bathrooms: ".card_split_vertically__spec:nth-child(4)"
+        parking: ".card_split_vertically__spec:nth-child(5)"
+        area: ".card_split_vertically__spec:nth-child(1)"
+        description: ""
+        image_url: ".cards_digital_carousel-image"
+
   - id: imobiliaria_2000
     name: "Imobiliária 2000"
     url_template: "https://www.imobiliaria2000.com.br/busca/?transacao=Locação&finalidade=Residencial&tipo=Casa&cidade={city}&imob_codigo=&area_ate=0%2C1000&valor_ate={min_price}%2C{max_price}&ordenar=&limite=&referencia="
