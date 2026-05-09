@@ -192,6 +192,7 @@ class PlaywrightBSAdapter(BaseAdapter):
         area_raw = self._extract_text(element, self.fields.get("area", ""))
         description = self._extract_text(element, self.fields.get("description", ""))
         image_url = self._extract_attr(element, self.fields.get("image_url", ""), "src")
+        property_code = self._extract_text(element, self.fields.get("property_code", ""))
 
         external_id = url or title or ""
 
@@ -207,6 +208,7 @@ class PlaywrightBSAdapter(BaseAdapter):
             area=extract_area(area_raw),
             description=description,
             image_url=image_url,
+            property_code=property_code or None,
         )
 
     async def fetch_listings(self) -> list[NormalizedListing]:

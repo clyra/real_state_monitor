@@ -54,6 +54,7 @@ class Listing(Base):
     area: Mapped[float | None] = mapped_column(Float, nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     image_url: Mapped[str | None] = mapped_column(String(2048), nullable=True)
+    property_code: Mapped[str | None] = mapped_column(String(50), nullable=True)
     is_active: Mapped[bool] = mapped_column(default=True)
     is_favorite: Mapped[bool] = mapped_column(default=False)
     missing_runs_count: Mapped[int] = mapped_column(Integer, default=0)

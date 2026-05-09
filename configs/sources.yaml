@@ -189,6 +189,7 @@ sources:
         area: ".card_split_vertically__spec:nth-child(1)"
         description: ""
         image_url: ".cards_digital_carousel-image"
+        property_code: ".card_split_vertically__code"
 
   - id: imobiliaria_2000
     name: "Imobiliária 2000"

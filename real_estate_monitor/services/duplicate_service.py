@@ -6,15 +6,38 @@ from real_estate_monitor.database import get_session
 from real_estate_monitor.models.models import Listing, ListingDuplicate
 from real_estate_monitor.services.text_utils import extract_neighborhood
 
-_PROPERTY_CODE_RE = re.compile(r"(\d{5})[.\-](\d{3})")
 SCORE_THRESHOLD = 70
 
+# Patterns to extract property codes from URLs when not stored explicitly.
+# Handles: ?ref=07804.001-CIL, /imovel/CA0309-TAN, etc.
+_URL_CODE_PATTERNS = [
+    re.compile(r"[?&]ref=([A-Z0-9]{3,}(?:[.\-][A-Z0-9]{2,})+)", re.IGNORECASE),
+    re.compile(r"/imovel/([A-Z0-9]{3,}(?:[.\-][A-Z0-9]{2,})+)", re.IGNORECASE),
+]
 
-def _extract_property_code(url: str | None) -> str | None:
-    if not url:
+# Known code suffixes → agency name. Extend as new suffixes are discovered.
+_SUFFIX_TO_AGENCY: dict[str, str] = {
+    "TAN": "Tantus Imóveis",
+}
+
+
+def infer_agency_from_code(code: str | None) -> str | None:
+    """Return the agency name inferred from the code suffix (e.g. CA0309-TAN → Tantus)."""
+    if not code:
         return None
-    m = _PROPERTY_CODE_RE.search(url)
-    return f"{m.group(1)}-{m.group(2)}" if m else None
+    suffix = code.rsplit("-", 1)[-1].upper()
+    return _SUFFIX_TO_AGENCY.get(suffix)
+
+
+def _get_property_code(listing: "Listing") -> str | None:  # type: ignore[name-defined]
+    """Return the listing's stored code, or try to extract one from its URL."""
+    if listing.property_code:
+        return listing.property_code.upper()
+    for pattern in _URL_CODE_PATTERNS:
+        m = pattern.search(listing.url or "")
+        if m:
+            return m.group(1).upper()
+    return None
 
 
 def _normalize_neighborhood(address: str | None) -> str | None:
@@ -27,8 +50,8 @@ def _normalize_neighborhood(address: str | None) -> str | None:
 def _compute_score(a: Listing, b: Listing) -> tuple[int, str]:
     """Return (score, method). Score 0 means no match."""
     # Layer 1: property code — definitive match
-    code_a = _extract_property_code(a.url)
-    code_b = _extract_property_code(b.url)
+    code_a = _get_property_code(a)
+    code_b = _get_property_code(b)
     if code_a and code_b and code_a == code_b:
         return 100, "property_code"
 

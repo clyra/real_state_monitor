@@ -38,3 +38,4 @@ class NormalizedListing(BaseModel):
     area: float | None = None
     description: str | None = None
     image_url: str | None = None
+    property_code: str | None = None

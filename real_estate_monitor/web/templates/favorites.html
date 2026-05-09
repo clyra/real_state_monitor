@@ -38,7 +38,10 @@
                             {% if listing.parking %}<span><i class="bi bi-car-front"></i> {{ listing.parking }}</span>{% endif %}
                             {% if listing.area %}<span><i class="bi bi-arrows-angle-expand"></i> {{ listing.area }}m²</span>{% endif %}
                         </div>
-                        <p class="card-text small text-muted"><i class="bi bi-tag"></i> {{ listing.source.name }}</p>
+                        <p class="card-text small text-muted">
+                            <i class="bi bi-tag"></i> {{ listing.source.name }}
+                            {% if listing.property_code %}<span class="badge bg-secondary font-monospace ms-1" title="Código do imóvel">{{ listing.property_code }}</span>{% endif %}
+                        </p>
                         <div class="d-flex gap-2 flex-wrap">
                             {% if listing.url %}
                             <a href="{{ listing.url }}" target="_blank" class="btn btn-sm btn-outline-primary">

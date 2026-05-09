@@ -60,6 +60,7 @@ class DiffService:
                     area=listing.area,
                     description=listing.description,
                     image_url=listing.image_url,
+                    property_code=listing.property_code,
                     is_active=True,
                     missing_runs_count=0,
                 )
@@ -122,6 +123,7 @@ class DiffService:
                     db_listing.area = listing.area
                     db_listing.description = listing.description
                     db_listing.image_url = listing.image_url
+                    db_listing.property_code = listing.property_code
 
         # Grace period: only mark REMOVED after missing from N consecutive runs
         for db_listing in existing:

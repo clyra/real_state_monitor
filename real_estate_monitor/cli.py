@@ -38,6 +38,10 @@ def migrate_db():
             "ALTER TABLE listings ADD COLUMN missing_runs_count INTEGER NOT NULL DEFAULT 0",
             "Added 'missing_runs_count' column to listings.",
         ),
+        (
+            "ALTER TABLE listings ADD COLUMN property_code TEXT",
+            "Added 'property_code' column to listings.",
+        ),
     ]
 
     for sql, msg in migrations:
