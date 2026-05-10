@@ -249,3 +249,26 @@ sources:
         area: ".info-single p:nth-of-type(4)"
         description: ""
         image_url: ".bg-single img"
+
+  - id: noruega_imoveis
+    name: "Imobiliária Noruega"
+    url: "https://imobiliarianoruega.com.br/properties?deal=Aluguel&type=Casa&minPrice=2000&maxPrice=4500"
+    adapter: "json_api"
+    enabled: true
+    config:
+      data_key: "data"
+      listing_url_template: "https://imobiliarianoruega.com.br/imoveis/aluguel/curitiba/{neighborhood_slug}/{id}/{title_slug}"
+      removal_grace_period: 2
+      scrape_health_threshold: 0.3
+      fields:
+        external_id: "id"
+        title: "title"
+        price: "rentPrice"
+        address: "address"
+        neighborhood: "neighborhood"
+        bedrooms: "beds"
+        bathrooms: "baths"
+        parking: "garage"
+        area: "area"
+        image_url: "images.0.url"
+        property_code: "code"
