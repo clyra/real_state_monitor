@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 
 from real_estate_monitor.adapters.base import BaseAdapter
+from real_estate_monitor.adapters.apolar_adapter import ApolarAdapter
 from real_estate_monitor.adapters.json_api_adapter import JsonApiAdapter
 from real_estate_monitor.adapters.playwright_bs_adapter import PlaywrightBSAdapter
 from real_estate_monitor.configs.config_loader import load_sources, sync_sources_to_db
@@ -36,6 +37,8 @@ class RunnerService:
             return PlaywrightBSAdapter(source_config)
         if source.adapter == "json_api":
             return JsonApiAdapter(source_config)
+        if source.adapter == "apolar":
+            return ApolarAdapter(source_config)
         raise ValueError(f"Unknown adapter type: {source.adapter}")
 
     async def run_source(self, source_id: int) -> None:

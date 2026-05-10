@@ -272,3 +272,68 @@ sources:
         area: "area"
         image_url: "images.0.url"
         property_code: "code"
+
+  - id: apolar_imoveis
+    name: "Apolar Imóveis"
+    url: "https://www.apolar.com.br/alugar/casa-residencial?mensal&country=Brasil&property_type=Casa-Residencial&property_type=Sobrado-Residencial&price_max=R%24%204.000,00&price_min=R%24%202.000,00"
+    adapter: "apolar"
+    enabled: true
+    config:
+      min_price: 2000
+      max_price: 4000
+      removal_grace_period: 2
+      scrape_health_threshold: 0.6
+
+  - id: quintoandar
+    name: "QuintoAndar"
+    url: "https://www.quintoandar.com.br/alugar/imovel/curitiba-pr-brasil/de-2000-a-4000-reais/casa/casacondominio"
+    adapter: "playwright_bs"
+    enabled: true
+    config:
+      headless: true
+      wait_selector: "[data-testid='house-card-container-rent']"
+      wait_timeout: 60000
+      listing_selector: "[data-testid='house-card-container-rent']"
+      pagination_type: "none"
+      removal_grace_period: 2
+      scrape_health_threshold: 0.1
+      fields:
+        title: "h2"
+        price: "p"
+        address: "h2:nth-of-type(2)"
+        url: "a"
+        bedrooms: "h3"
+        bathrooms: ""
+        parking: "h3"
+        area: "h3"
+        description: ""
+        image_url: "img"
+
+  - id: tendencia_imoveis
+    name: "Tendência Imóveis"
+    url: "https://www.tendenciaimoveis.com.br/filtro/list/locacao/sobrado---casa/curitiba----todos----todos----todos----0-1000000000000/todos/todos/2000-4000/todos/1"
+    adapter: "playwright_bs"
+    enabled: true
+    config:
+      headless: true
+      wait_selector: "a[href*='/imovel/']"
+      wait_timeout: 8000
+      listing_selector: "a[href*='/imovel/']"
+      pagination_type: "url"
+      pagination:
+        url_pattern: "https://www.tendenciaimoveis.com.br/filtro/list/locacao/sobrado---casa/curitiba----todos----todos----todos----0-1000000000000/todos/todos/2000-4000/todos/{page}"
+        max_pages: 10
+      removal_grace_period: 2
+      scrape_health_threshold: 0.3
+      fields:
+        title: ".heading-4"
+        price: ".text-block-11"
+        address: ".text-block-15"
+        url: ""
+        bedrooms: ".room-feature-grid"
+        bathrooms: ".room-feature-grid"
+        parking: ".room-feature-grid"
+        area: ".room-feature-grid"
+        description: ""
+        image_url: ".property-image"
+        property_code: ".text-block-14"

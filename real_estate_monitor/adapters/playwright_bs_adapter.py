@@ -192,6 +192,8 @@ class PlaywrightBSAdapter(BaseAdapter):
         area_raw = self._extract_text(element, self.fields.get("area", ""))
         description = self._extract_text(element, self.fields.get("description", ""))
         image_url = self._extract_attr(element, self.fields.get("image_url", ""), "src")
+        if image_url and not image_url.startswith(("http://", "https://")):
+            image_url = urljoin(self.source_config["url"], image_url)
         property_code = self._extract_text(element, self.fields.get("property_code", ""))
 
         external_id = url or title or ""
