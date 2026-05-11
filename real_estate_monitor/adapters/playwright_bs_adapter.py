@@ -196,7 +196,7 @@ class PlaywrightBSAdapter(BaseAdapter):
             image_url = urljoin(self.source_config["url"], image_url)
         property_code = self._extract_text(element, self.fields.get("property_code", ""))
 
-        external_id = url or title or ""
+        external_id = property_code or url or title or ""
 
         return NormalizedListing(
             external_id=external_id,

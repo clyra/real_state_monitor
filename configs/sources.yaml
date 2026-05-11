@@ -337,3 +337,35 @@ sources:
         description: ""
         image_url: ".property-image"
         property_code: ".text-block-14"
+
+  - id: gonzaga_imoveis
+    name: "Gonzaga Imóveis"
+    url_template: "https://www.gonzagaimoveis.com.br/imoveis?types=casa;casa+em+condominio;sobrado&city=Curitiba&min_price={min_price}&max_price={max_price}"
+    filters:
+      min_price: 2000
+      max_price: 4000
+    adapter: "playwright_bs"
+    enabled: true
+    config:
+      headless: true
+      wait_selector: ".card-real-estate"
+      wait_timeout: 20000
+      listing_selector: ".card-real-estate"
+      pagination_type: "url"
+      pagination:
+        url_pattern: "https://www.gonzagaimoveis.com.br/imoveis?types=casa;casa+em+condominio;sobrado&city=Curitiba&min_price=2000&max_price=4000&page={page}"
+        max_pages: 10
+      removal_grace_period: 2
+      scrape_health_threshold: 0.6
+      fields:
+        title: "h3.ui-title.none"
+        price: "div.ui-text.ui-text--weight-600.cl-primary-80"
+        address: "h2.ui-title.ui-title--w-d.ui-title--xxs.ui-title--ellipsis.cl-black-60"
+        url: "a.card-real-estate-link"
+        bedrooms: "div.v-flex.--w-d.py-4 > div:nth-child(2) div.ui-text.ui-text--md.ui-text--weight-600"
+        bathrooms: ""
+        parking: "div.v-flex.--w-d.py-4 > div:nth-child(3) div.ui-text.ui-text--md.ui-text--weight-600"
+        area: "div.v-flex.--w-d.py-4 > div:nth-child(1) div.ui-text.ui-text--md.ui-text--weight-600"
+        description: ""
+        image_url: ".card-real-estate-img-container img"
+        property_code: "div.ui-text.ui-text--xs"
