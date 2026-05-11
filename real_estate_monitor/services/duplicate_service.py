@@ -6,7 +6,7 @@ from real_estate_monitor.database import get_session
 from real_estate_monitor.models.models import Listing, ListingDuplicate
 from real_estate_monitor.services.text_utils import extract_neighborhood
 
-SCORE_THRESHOLD = 70
+SCORE_THRESHOLD = 80
 
 # Patterns to extract property codes from URLs when not stored explicitly.
 # Handles: ?ref=07804.001-CIL, /imovel/CA0309-TAN, etc.

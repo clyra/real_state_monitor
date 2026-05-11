@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from urllib.parse import urljoin
+from urllib.parse import parse_qsl, urljoin, urlparse, urlunparse
 
 from bs4 import BeautifulSoup
 
@@ -175,6 +175,33 @@ class PlaywrightBSAdapter(BaseAdapter):
             await self._load_page()
         return self._htmls
 
+    _TRACKING_PARAMS = frozenset({
+        "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content",
+        "fbclid", "gclid", "gclsrc", "dclid", "msclkid",
+        "_ga", "_gl", "_gcl_aw", "_gcl_au", "_gcl_dc",
+        "session", "sid", "token", "ts", "_t", "_", "rand", "random",
+        "nc", "r", "d", "v", "ver", "cb", "t", "cache",
+    })
+
+    @staticmethod
+    def _normalize_url(url: str | None) -> str | None:
+        if not url:
+            return url
+        parsed = urlparse(url)
+        if not parsed.query:
+            return url
+        params = [
+            (k, v)
+            for k, v in parse_qsl(parsed.query, keep_blank_values=True)
+            if k.lower() not in PlaywrightBSAdapter._TRACKING_PARAMS
+        ]
+        cleaned_query = "&".join(f"{k}={v}" for k, v in params)
+        normalized = urlunparse((
+            parsed.scheme, parsed.netloc, parsed.path.rstrip("/"),
+            parsed.params, cleaned_query, parsed.fragment,
+        ))
+        return normalized.rstrip("?&")
+
     def _extract_text(self, element, selector: str) -> str | None:
         if not selector:
             return None
@@ -215,7 +242,8 @@ class PlaywrightBSAdapter(BaseAdapter):
             image_url = urljoin(self.source_config["url"], image_url)
         property_code = self._extract_text(element, self.fields.get("property_code", ""))
 
-        external_id = property_code or url or title or ""
+        id_url = self._normalize_url(url)
+        external_id = property_code or id_url or title or ""
 
         return NormalizedListing(
             external_id=external_id,
