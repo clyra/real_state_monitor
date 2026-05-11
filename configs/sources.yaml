@@ -352,6 +352,7 @@ sources:
       wait_timeout: 20000
       listing_selector: ".card-real-estate"
       pagination_type: "url"
+      scroll_to_load_images: true
       pagination:
         url_pattern: "https://www.gonzagaimoveis.com.br/imoveis?types=casa;casa+em+condominio;sobrado&city=Curitiba&min_price=2000&max_price=4000&page={page}"
         max_pages: 10

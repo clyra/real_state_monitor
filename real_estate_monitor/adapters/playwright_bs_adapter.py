@@ -29,13 +29,31 @@ class PlaywrightBSAdapter(BaseAdapter):
         self.pagination_type = self.config.get("pagination_type", "none")
         self.pagination_config = self.config.get("pagination", {})
         self.max_pages = self.pagination_config.get("max_pages", 20)
+        self.scroll_to_load_images = self.config.get("scroll_to_load_images", False)
         self._htmls: list[str] = []
+
+    async def _trigger_lazy_images(self, page) -> None:
+        if not self.scroll_to_load_images:
+            return
+        await page.evaluate("""
+            async () => {
+                const step = window.innerHeight * 0.8;
+                const total = document.body.scrollHeight;
+                for (let y = step; y <= total; y += step) {
+                    window.scrollTo(0, y);
+                    await new Promise(r => setTimeout(r, 150));
+                }
+                window.scrollTo(0, 0);
+            }
+        """)
+        await page.wait_for_timeout(800)
 
     async def _load_page(self) -> str:
         async with BrowserWrapper(headless=self.headless) as browser:
             page = await browser.new_page()
             await page.goto(self.source_config["url"], timeout=self.wait_timeout)
             await page.wait_for_selector(self.wait_selector, timeout=self.wait_timeout)
+            await self._trigger_lazy_images(page)
 
             if self.pagination_type == "scroll":
                 await self._handle_scroll_pagination(page)
@@ -139,6 +157,7 @@ class PlaywrightBSAdapter(BaseAdapter):
                     await page.wait_for_selector(
                         self.wait_selector, timeout=self.wait_timeout
                     )
+                    await self._trigger_lazy_images(page)
                     htmls.append(await page.content())
                 except Exception:
                     break
