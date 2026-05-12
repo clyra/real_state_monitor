@@ -308,6 +308,7 @@ sources:
         area: "h3"
         description: ""
         image_url: "img"
+        property_code_regex: "/imovel/(\\d+)"
 
   - id: tendencia_imoveis
     name: "Tendência Imóveis"
@@ -350,6 +351,7 @@ sources:
       headless: true
       wait_selector: ".card-real-estate"
       wait_timeout: 20000
+      wait_until: "domcontentloaded"
       listing_selector: ".card-real-estate"
       pagination_type: "url"
       scroll_to_load_images: true

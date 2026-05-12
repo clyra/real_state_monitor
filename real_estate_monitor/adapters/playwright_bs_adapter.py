@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from urllib.parse import parse_qsl, urljoin, urlparse, urlunparse
 
 from bs4 import BeautifulSoup
@@ -25,6 +26,7 @@ class PlaywrightBSAdapter(BaseAdapter):
         self.headless = self.config.get("headless", True)
         self.wait_selector = self.config.get("wait_selector", ".listing-item")
         self.wait_timeout = self.config.get("wait_timeout", 10000)
+        self.wait_until = self.config.get("wait_until", "load")
         self.listing_selector = self.config.get("listing_selector", ".listing-item")
         self.pagination_type = self.config.get("pagination_type", "none")
         self.pagination_config = self.config.get("pagination", {})
@@ -51,7 +53,7 @@ class PlaywrightBSAdapter(BaseAdapter):
     async def _load_page(self) -> str:
         async with BrowserWrapper(headless=self.headless) as browser:
             page = await browser.new_page()
-            await page.goto(self.source_config["url"], timeout=self.wait_timeout)
+            await page.goto(self.source_config["url"], timeout=self.wait_timeout, wait_until=self.wait_until)
             await page.wait_for_selector(self.wait_selector, timeout=self.wait_timeout)
             await self._trigger_lazy_images(page)
 
@@ -153,7 +155,7 @@ class PlaywrightBSAdapter(BaseAdapter):
             async with BrowserWrapper(headless=self.headless) as browser:
                 page = await browser.new_page()
                 try:
-                    await page.goto(url, timeout=self.wait_timeout)
+                    await page.goto(url, timeout=self.wait_timeout, wait_until=self.wait_until)
                     await page.wait_for_selector(
                         self.wait_selector, timeout=self.wait_timeout
                     )
@@ -241,6 +243,12 @@ class PlaywrightBSAdapter(BaseAdapter):
         if image_url and not image_url.startswith(("http://", "https://")):
             image_url = urljoin(self.source_config["url"], image_url)
         property_code = self._extract_text(element, self.fields.get("property_code", ""))
+        if not property_code and url:
+            property_code_regex = self.fields.get("property_code_regex", "")
+            if property_code_regex:
+                m = re.search(property_code_regex, url)
+                if m:
+                    property_code = m.group(1)
 
         id_url = self._normalize_url(url)
         external_id = property_code or id_url or title or ""
