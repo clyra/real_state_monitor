@@ -31,13 +31,9 @@ def infer_agency_from_code(code: str | None) -> str | None:
 
 
 def _get_property_code(listing: "Listing") -> str | None:  # type: ignore[name-defined]
-    """Return the listing's stored code, or try to extract one from its URL."""
-    if listing.property_code:
-        return listing.property_code.upper()
-    for pattern in _URL_CODE_PATTERNS:
-        m = pattern.search(listing.url or "")
-        if m:
-            return m.group(1).upper()
+    """Return the listing's stored code if non-empty. Empty/null codes are ignored."""
+    if listing.property_code and listing.property_code.strip():
+        return listing.property_code.strip().upper()
     return None
 
 
