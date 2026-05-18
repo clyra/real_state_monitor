@@ -126,6 +126,7 @@ sources:
         area: ".elementor-inline-item:nth-child(5) .elementor-icon-list-text"
         description: ""
         image_url: ".elementor-shortcode img"
+        property_code_regex: "para-aluguel-([^/]+?)/?$"
 
   - id: kondor_imoveis
     name: "Kondor Imóveis"
@@ -294,8 +295,11 @@ sources:
       wait_selector: "[data-testid='house-card-container-rent']"
       wait_timeout: 60000
       listing_selector: "[data-testid='house-card-container-rent']"
-      pagination_type: "none"
-      removal_grace_period: 2
+      pagination_type: "scroll"
+      pagination:
+        max_pages: 20
+        scroll_pause: 2.5
+      removal_grace_period: 5
       scrape_health_threshold: 0.1
       fields:
         title: "h2"

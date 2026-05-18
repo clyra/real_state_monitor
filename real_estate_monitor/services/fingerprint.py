@@ -9,7 +9,6 @@ from real_estate_monitor.schemas.schemas import NormalizedListing
 def compute_fingerprint(listing: NormalizedListing) -> str:
     data = json.dumps(
         {
-            "external_id": listing.external_id,
             "title": listing.title,
             "address": listing.address,
             "bedrooms": listing.bedrooms,

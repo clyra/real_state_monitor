@@ -66,7 +66,7 @@
             </div>
             {% endif %}
             <div class="card-body">
-                <h6 class="card-title">{{ listing.title or listing.external_id }}</h6>
+                <h6 class="card-title">{{ listing.title or listing.external_id }}{% if listing.property_code %}<span class="badge bg-secondary font-monospace ms-1" title="Código do imóvel">{{ listing.property_code }}</span>{% endif %}</h6>
                 {% if listing.price %}
                 <p class="card-text text-success fw-bold">R$ {{ "{:,.2f}".format(listing.price) }}</p>
                 {% endif %}
@@ -131,7 +131,7 @@
                     <small class="text-muted">{{ event.created_at.strftime('%d/%m %H:%M') }}</small>
                 </div>
                 <h6 class="card-title">
-                    {% if event.listing %}{{ event.listing.title or event.listing.external_id }}{% else %}N/A{% endif %}
+                    {% if event.listing %}{{ event.listing.title or event.listing.external_id }}{% if event.listing.property_code %}<span class="badge bg-secondary font-monospace ms-1" title="Código do imóvel">{{ event.listing.property_code }}</span>{% endif %}{% else %}N/A{% endif %}
                 </h6>
                 {% if event.listing and event.listing.price %}
                 <p class="card-text text-success fw-bold">R$ {{ "{:,.2f}".format(event.listing.price) }}</p>

@@ -249,6 +249,13 @@ class PlaywrightBSAdapter(BaseAdapter):
                 m = re.search(property_code_regex, url)
                 if m:
                     property_code = m.group(1)
+                    # Strip WordPress duplicate counter (-2, -3, …) appended when
+                    # a slug already exists. Only strip when the preceding segment
+                    # ends with a letter so numeric codes like "00040-002-2" are
+                    # preserved unchanged.
+                    stripped = re.match(r"^(.*[a-zA-Z])-\d+$", property_code)
+                    if stripped:
+                        property_code = stripped.group(1)
 
         id_url = self._normalize_url(url)
         external_id = property_code or id_url or title or ""
