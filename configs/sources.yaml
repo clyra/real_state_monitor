@@ -29,6 +29,7 @@ sources:
         area: "ul li:nth-child(1)"
         description: ""
         image_url: ".cards_digital_carousel-image"
+        property_code_regex: "/imovel/[^/]*/([^/?]+)"
 
   - id: una_imoveis
     name: "UNA Imóveis Conectados"
@@ -61,6 +62,7 @@ sources:
         area: "[data-area-total]"
         description: ""
         image_url: ".infoImovel.fotos img"
+        property_code_regex: "curitiba-([^/-]+)/\\d+"
 
   - id: jb9_imoveis
     name: "JB9 Imóveis"
@@ -94,6 +96,7 @@ sources:
         area: ""
         description: ""
         image_url: ".swiper_resultados .swiper-slide:first-child img"
+        property_code_regex: "/casa/(\\d+)"
 
   - id: baggio_imoveis
     name: "Baggio Imóveis"
@@ -159,6 +162,7 @@ sources:
         area: ".destaques-lista:nth-of-type(1) .item-destaque"
         description: ""
         image_url: ".infoImovel.fotos img"
+        property_code_regex: "curitiba-([^/-]+)/\\d+"
 
   - id: tantus_imoveis
     name: "Tantus Imóveis"
@@ -191,6 +195,7 @@ sources:
         description: ""
         image_url: ".cards_digital_carousel-image"
         property_code: ".card_split_vertically__code"
+        property_code_regex: "/imovel/[^/]*/([^/?]+)"
 
   - id: jba_imoveis
     name: "JBA Imóveis"
@@ -216,7 +221,7 @@ sources:
         area: ".amenities-main div:nth-child(3) span"
         description: ""
         image_url: ""
-        property_code: ""
+        property_code_regex: "/imovel/(\\d+)/"
 
   - id: imobiliaria_2000
     name: "Imobiliária 2000"
@@ -250,6 +255,7 @@ sources:
         area: ".info-single p:nth-of-type(4)"
         description: ""
         image_url: ".bg-single img"
+        property_code_regex: "ref=([^&]+)"
 
   - id: noruega_imoveis
     name: "Imobiliária Noruega"
