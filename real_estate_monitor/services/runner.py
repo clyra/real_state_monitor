@@ -105,7 +105,10 @@ class RunnerService:
         for source in sources:
             if source.enabled:
                 print(f"\nRunning source: {source.name} ({source.id})")
-                await self.run_source(source.id)
+                try:
+                    await self.run_source(source.id)
+                except Exception as exc:
+                    print(f"[ERRO] {source.name}: {exc}")
 
     async def dry_run_source(self, source_id: int) -> None:
         session = get_session(self.db_url)
